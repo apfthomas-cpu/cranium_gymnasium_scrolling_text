@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Cranium Scrolling Exercise</title>
 
-<!-- Cranium Fonts -->
+<!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
 /* ============================================================
-   GLOBAL BACKGROUND + BASE
+   GLOBAL BACKGROUND
    ============================================================ */
 html, body {
   margin: 0;
@@ -22,7 +22,7 @@ html, body {
   height: 100%;
 }
 
-/* Avoid fixed backgrounds on mobile */
+/* Fix for mobile */
 @media (max-width: 768px) {
   html, body {
     background-attachment: scroll;
@@ -30,9 +30,10 @@ html, body {
 }
 
 /* ============================================================
-   FULLSCREEN SCROLL AREA WITH 5% MARGINS
+   SCROLL AREA (HIDDEN UNTIL START)
    ============================================================ */
 #scroll-wrapper {
+  display: none;
   position: absolute;
   top: 5vh;
   left: 50%;
@@ -47,25 +48,29 @@ html, body {
   overflow: hidden;
 }
 
-/* The vertically scrolling text */
+/* Scrolling text */
 #scroll-text {
   position: absolute;
-  top: 0;
   left: 0;
   right: 0;
+
+  /* NEW: internal padding so text doesn't touch edges */
+  padding-left: clamp(20px, 3vw, 40px);
+  padding-right: clamp(20px, 3vw, 40px);
+  padding-top: clamp(10px, 2vw, 20px);
+  padding-bottom: clamp(10px, 2vw, 20px);
+
+  box-sizing: border-box;
   font-size: clamp(17px, 2.7vw, 22px);
   line-height: 1.6;
 }
 
-/* ============================================================
-   CLICKABLE WORDS
-   ============================================================ */
+/* Words */
 .word {
   margin-right: 0.25rem;
   cursor: pointer;
 }
 
-/* ALL clicked words → bold & black only */
 .correct,
 .incorrect {
   font-weight: 700;
@@ -73,7 +78,7 @@ html, body {
 }
 
 /* ============================================================
-   OVERLAYS (LAUNCH + END)
+   LAUNCH SCREEN (Background only + glass box)
    ============================================================ */
 #launch-overlay {
   position: fixed;
@@ -85,17 +90,18 @@ html, body {
   z-index: 999;
 }
 
+/* END overlay */
 #end-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   display: none;
   justify-content: center;
   align-items: center;
   z-index: 999;
 }
 
-/* Semi-translucent launch + end box */
+/* Glass box */
 .overlay-box {
   background: rgba(255,255,255,0.93);
   backdrop-filter: blur(10px);
@@ -117,8 +123,6 @@ html, body {
 .overlay-box p {
   font-size: clamp(16px, 4vw, 18px);
   margin: 6px 0;
-  line-height: 1.4;
-  color: #222;
 }
 
 /* Button */
@@ -140,7 +144,7 @@ html, body {
   opacity: 0.9;
 }
 
-/* Entrance animation */
+/* Animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -151,10 +155,11 @@ html, body {
 <body>
 
 <!-- ============================================================
-     FULLSCREEN SCROLL WRAPPER
+     SCROLL BOX
      ============================================================ -->
 <div id="scroll-wrapper">
   <div id="scroll-text">
+
     <p>Apples iStore are instantly recognizable. Its architecture are sleek, minimalist, and almost museum-like. The walls are wite, the tables are wooden, and the devices are displayed with presision. This design reflects Apple’s marketing strategy: simplicity, eligance, and exclusivity. The store itself is part of the brand’s storytelling, reinforcing the idea that Apple products are not just tools but lifestyle choices.</p>
 
     <p>Samsung’s flogship store, by contrast, is vibrant and interactive. Known as Samsung KX, it is designed less like a shop and more like a tecnology playground. Visitors can explore zones dedicated to virtual reality, smart kitchens, and even creative workshops. The atmosphere is energetic, colorful, and dynamic, reflecting Samsung’s marketing approach: technology as an everyday companion, accessible and versatile.</p>
@@ -176,11 +181,12 @@ html, body {
     <p>Ultimitely, Apple wins in loyalty. Customers often line up overnight for new iPhones, driven by emotional connection to the brand. Samsung wins in engagement. Visitors spend hours exploring, experimenting, and learning, even if they don’t make a purchase.</p>
 
     <p>The story of Apple and Samsung in London is not about which company is better. It is about how two companies tell very different stories through their stores, and how those stories shape the way people experience technology. Apple’s iStore represents polished exclusivity and emotional branding. Samsung’s flagship store represents interactive accessibility and practical demonstrations. Together, they show two visions of the future: one sleek and aspirational, the other playful and inclusive.</p>
+
   </div>
 </div>
 
 <!-- ============================================================
-     LAUNCH OVERLAY (uses Background.jpg & hides text completely)
+     LAUNCH SPLASH
      ============================================================ -->
 <div id="launch-overlay">
   <div class="overlay-box">
@@ -193,7 +199,7 @@ html, body {
 </div>
 
 <!-- ============================================================
-     END OVERLAY
+     END SCREEN
      ============================================================ -->
 <div id="end-overlay">
   <div class="overlay-box">
@@ -205,7 +211,7 @@ html, body {
 
 <script>
 /* ============================================================
-   SCROLL LOGIC
+   LOGIC
    ============================================================ */
 const textContainer = document.getElementById("scroll-text");
 const scrollWrapper = document.getElementById("scroll-wrapper");
@@ -216,17 +222,17 @@ const mistakes = [
   "fice","markting","importants","Ultimitely"
 ];
 
+/* Starting position (but set properly AFTER Start is pressed) */
 let position = 0;
-let lastTime = performance.now();
 
-/* Slower base scroll speed (50% reduction) */
+let lastTime = performance.now();
 let pixelsPerSecond = 12.5;
 let targetSpeed = 12.5;
 
 let exerciseStarted = false;
 let ended = false;
 
-/* Prepare text for clickable words */
+/* Prepare clickable spans */
 textContainer.querySelectorAll("p").forEach(p => {
   p.innerHTML = p.innerText
     .split(" ")
@@ -234,14 +240,14 @@ textContainer.querySelectorAll("p").forEach(p => {
     .join(" ");
 });
 
-/* Click behaviours */
+/* Word clicking */
 document.querySelectorAll(".word").forEach(span => {
   span.addEventListener("click", () => {
     if (!exerciseStarted || ended) return;
     if (mistakes.includes(span.innerText)) {
       if (!span.classList.contains("correct")) {
         span.classList.add("correct");
-        targetSpeed += 3;
+        targetSpeed += 6;
       }
     } else {
       span.classList.add("incorrect");
@@ -252,10 +258,18 @@ document.querySelectorAll(".word").forEach(span => {
 /* Start button */
 document.getElementById("start-btn").addEventListener("click", () => {
   exerciseStarted = true;
+
   document.getElementById("launch-overlay").style.display = "none";
+  scrollWrapper.style.display = "block";
+
+  /* NOW the wrapper has a real height → safe to set starting pos */
+  requestAnimationFrame(() => {
+    position = scrollWrapper.clientHeight * 0.5;  // HALF WAY UP
+    textContainer.style.top = position + "px";
+  });
 });
 
-/* Continue button → manutd.com */
+/* End continue */
 document.getElementById("continue-btn").addEventListener("click", () => {
   window.location.href = "https://www.manutd.com";
 });
@@ -275,7 +289,7 @@ function scrollText(t) {
 }
 requestAnimationFrame(scrollText);
 
-/* End detection: entire text must pass above top */
+/* End detection */
 function checkEnd() {
   if (!exerciseStarted || ended) {
     requestAnimationFrame(checkEnd);
@@ -290,7 +304,6 @@ function checkEnd() {
   }
 
   requestAnimationFrame(checkEnd);
-
 }
 requestAnimationFrame(checkEnd);
 </script>
