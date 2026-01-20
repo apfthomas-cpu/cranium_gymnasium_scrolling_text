@@ -3,15 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Cranium Scrolling Exercise</title>
+<title>Scrolling Text Exercise</title>
 
-<!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
-/* ============================================================
-   GLOBAL BACKGROUND
-   ============================================================ */
 html, body {
   margin: 0;
   padding: 0;
@@ -22,16 +18,10 @@ html, body {
   height: 100%;
 }
 
-/* Fix for mobile */
 @media (max-width: 768px) {
-  html, body {
-    background-attachment: scroll;
-  }
+  html, body { background-attachment: scroll; }
 }
 
-/* ============================================================
-   SCROLL AREA (HIDDEN UNTIL START)
-   ============================================================ */
 #scroll-wrapper {
   display: none;
   position: absolute;
@@ -40,7 +30,7 @@ html, body {
   transform: translateX(-50%);
   width: 90vw;
   height: 90vh;
-  background: rgba(255,255,255,0.75);
+  background: rgba(255,255,255,0.78);
   backdrop-filter: blur(12px);
   border-radius: 26px;
   box-shadow: 0 12px 35px rgba(0,0,0,0.28);
@@ -48,266 +38,412 @@ html, body {
   overflow: hidden;
 }
 
-/* Scrolling text */
 #scroll-text {
   position: absolute;
   left: 0;
   right: 0;
-
-  /* NEW: internal padding so text doesn't touch edges */
-  padding-left: clamp(20px, 3vw, 40px);
-  padding-right: clamp(20px, 3vw, 40px);
-  padding-top: clamp(10px, 2vw, 20px);
-  padding-bottom: clamp(10px, 2vw, 20px);
-
-  box-sizing: border-box;
+  padding: 20px 30px;
   font-size: clamp(17px, 2.7vw, 22px);
   line-height: 1.6;
 }
 
-/* Words */
+#scroll-text p {
+  margin: 0 0 1.1em 0;
+}
+
 .word {
   margin-right: 0.25rem;
   cursor: pointer;
 }
 
-.correct,
-.incorrect {
+/* clicked words: bold + black only */
+.word.correct,
+.word.incorrect {
   font-weight: 700;
-  color: #000;
+  color: black;
+  text-decoration: none;
 }
 
-/* ============================================================
-   LAUNCH SCREEN (Background only + glass box)
-   ============================================================ */
-#launch-overlay {
+.overlay {
   position: fixed;
   inset: 0;
-  background: url("Background.jpg") center center / cover no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 999;
 }
 
-/* END overlay */
-#end-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
+#launch-overlay {
+  background: url("Background.jpg") center center / cover no-repeat;
 }
 
-/* Glass box */
+#end-overlay {
+  background: rgba(0,0,0,0.38);
+  display: none;
+}
+
 .overlay-box {
-  background: rgba(255,255,255,0.93);
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(10px);
-  padding: clamp(20px, 4vw, 40px);
-  border-radius: 26px;
+  padding: clamp(20px,4vw,40px);
+  border-radius: 24px;
   width: 90%;
-  max-width: 460px;
+  max-width: 500px;
   text-align: center;
   box-shadow: 0 12px 32px rgba(0,0,0,0.25);
-  animation: fadeIn 0.5s ease;
 }
 
 .overlay-box h1 {
   font-family: 'Montserrat', sans-serif;
-  font-size: clamp(26px, 6vw, 34px);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  font-size: clamp(26px,6vw,32px);
 }
 
 .overlay-box p {
-  font-size: clamp(16px, 4vw, 18px);
   margin: 6px 0;
+  font-size: clamp(16px,4vw,18px);
 }
 
-/* Button */
-.cranium-button {
+.button-row {
   margin-top: 18px;
-  padding: clamp(12px, 3vw, 14px) clamp(26px, 5vw, 32px);
-  font-size: clamp(16px, 4vw, 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cranium-button {
+  padding: 12px 24px;
   border: none;
   border-radius: 14px;
   background: linear-gradient(to bottom, #9aa5b1, #6f7882);
   color: white;
+  font-size: clamp(16px,4vw,20px);
   font-family: 'Montserrat', sans-serif;
   cursor: pointer;
   transition: 0.25s ease;
 }
-
 .cranium-button:hover {
+  opacity: 0.85;
   transform: translateY(-2px);
-  opacity: 0.9;
 }
 
-/* Animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
+.score-line {
+  font-weight: 600;
+}
+.best-line {
+  font-size: 15px;
+  opacity: 0.75;
 }
 </style>
 </head>
-
 <body>
 
-<!-- ============================================================
-     SCROLL BOX
-     ============================================================ -->
 <div id="scroll-wrapper">
-  <div id="scroll-text">
-
-    <p>Apples iStore are instantly recognizable. Its architecture are sleek, minimalist, and almost museum-like. The walls are wite, the tables are wooden, and the devices are displayed with presision. This design reflects Apple’s marketing strategy: simplicity, eligance, and exclusivity. The store itself is part of the brand’s storytelling, reinforcing the idea that Apple products are not just tools but lifestyle choices.</p>
-
-    <p>Samsung’s flogship store, by contrast, is vibrant and interactive. Known as Samsung KX, it is designed less like a shop and more like a tecnology playground. Visitors can explore zones dedicated to virtual reality, smart kitchens, and even creative workshops. The atmosphere is energetic, colorful, and dynamic, reflecting Samsung’s marketing approach: technology as an everyday companion, accessible and versatile.</p>
-
-    <p>Apple’s marketing rely heavily on emotional branding. There advertisements often show familys connecting, students creating, or professionals acheiving success. The message is subtle but powerful: owning Apple products makes life smoother, more creative, and more meaningful. This emotional appeal is reinforced in the store, where the environment feels calm and aspirational.</p>
-
-    <p>Samsungs marketing, on the other hand, emphasizes practicality and variety. Their campaigns highlight how devices integrate into daily life—phones that connect to smart fridges, tablets that help with work, and TVs that transform living rooms. The flagship store mirrors this approach by offering demonstrations and workshops that show technology in action. The message is clear: Samsung wants to prove that its products are useful in every corner of life.</p>
-
-    <p>Yet both approaches fice challenges. Apple’s iStore sometimes feels intimidating. The polished environment can make customers hesitant to ask questions, and the high prices reinforce the sense of exclusivity. Moreover, Apple’s constant cycle of new product releases encourages frequent upgrades, raising concerns about sustainability and electronic waste. Critics argue that this “upgrade culture” pressures consumers to replace devices unnecessarily.</p>
-
-    <p>Samsung’s flagship store faces a different set of issues. Its size and variety can be overwhelming. With so many zones and activities, visitors may become distracted from the core products. Some people come for the workshops or café without engaging deeply with the devices. Additionally, Samsung’s flagship concept has struggled with consistency; while London’s store thrives, similar spaces in other cities have closed when sales slowed.</p>
-
-    <p>Apple’s iStore attracts tourists from around the world. Many visitors come not only to shop but to experience the brand’s prestige. The store becomes a destination, a place to take photos and feel part of the Apple community. Samsung’s flagship store, in contrast, appeals more to locals who want to explore technology in a hands-on way. It is less about prestige and more about participation.</p>
-
-    <p>The differences can be summarized as tone. Apple’s markting is like a whisper—calm, elegant, persuasive. Samsung’s marketing is like a shout—energetic, colorful, and full of action. Apple makes customers feel like they are joining an exclusive club. Samsung makes them feel like they are joining a community experiment. Both companies design their stores as more than retail spaces. Apple calls its stores “town squares,” places where people can gather, learn, and connect. Samsung calls its flagship store an “experience hub,” where technology feels alive and interactive. These metaphors reveal their philosophies: Apple focuses on identity and belonging, while Samsung focuses on engagement and exploration.</p>
-
-    <p>The practical issues remain importants. Apple’s upgrade culture raises questions about environmental responsibility. Samsung’s flagship model raises questions about sustainability of the concept itself. Yet both continue to innovate in how they present technology to the public.</p>
-
-    <p>Ultimitely, Apple wins in loyalty. Customers often line up overnight for new iPhones, driven by emotional connection to the brand. Samsung wins in engagement. Visitors spend hours exploring, experimenting, and learning, even if they don’t make a purchase.</p>
-
-    <p>The story of Apple and Samsung in London is not about which company is better. It is about how two companies tell very different stories through their stores, and how those stories shape the way people experience technology. Apple’s iStore represents polished exclusivity and emotional branding. Samsung’s flagship store represents interactive accessibility and practical demonstrations. Together, they show two visions of the future: one sleek and aspirational, the other playful and inclusive.</p>
-
-  </div>
+  <div id="scroll-text"></div>
 </div>
 
-<!-- ============================================================
-     LAUNCH SPLASH
-     ============================================================ -->
-<div id="launch-overlay">
+<div id="launch-overlay" class="overlay">
   <div class="overlay-box">
     <h1>Scrolling Text Exercise</h1>
     <p>The text will scroll upwards.</p>
     <p>Identify the grammatical mistakes by clicking on them.</p>
-    <p>Click Start to begin.</p>
     <button class="cranium-button" id="start-btn">Start</button>
   </div>
 </div>
 
-<!-- ============================================================
-     END SCREEN
-     ============================================================ -->
-<div id="end-overlay">
+<div id="end-overlay" class="overlay">
   <div class="overlay-box">
-    <h1>END</h1>
-    <p>You have reached the end of the passage.</p>
-    <button class="cranium-button" id="continue-btn">Continue</button>
+    <h1>Results</h1>
+    <p id="correct-line" class="score-line"></p>
+    <p id="incorrect-line"></p>
+    <p id="accuracy-line"></p>
+    <p id="best-line" class="best-line"></p>
+    <div class="button-row">
+      <button class="cranium-button" id="retry-btn">Try Again</button>
+      <button class="cranium-button" id="new-btn">New Text</button>
+    </div>
   </div>
 </div>
 
 <script>
-/* ============================================================
-   LOGIC
-   ============================================================ */
-const textContainer = document.getElementById("scroll-text");
-const scrollWrapper = document.getElementById("scroll-wrapper");
+// =============================
+// PASSAGES + MISTAKES
+// =============================
+const passages = [
+  {
+    title: "Apple vs Samsung",
+    text: `
+Apples iStore are instantly recognizable. Its architecture are sleek, minimalist, and almost museum-like. The walls are wite, the tables are wooden, and the devices are displayed with presision. This design reflects Apple’s marketing strategy: simplicity, eligance, and exclusivity. The store itself is part of the brand’s storytelling, reinforcing the idea that Apple products are not just tools but lifestyle choices.
 
-const mistakes = [
-  "Apples","are","are","wite","eligance","presision","tecnology",
-  "familys","acheiving","rely","There","flogship","Samsungs",
-  "fice","markting","importants","Ultimitely"
+Samsung’s flogship store, by contrast, is vibrant and interactive. Known as Samsung KX, it is designed less like a shop and more like a tecnology playground. Visitors can explore zones dedicated to virtual reality, smart kitchens, and even creative workshops. The atmosphere is energetic, colorful, and dynamic, reflecting Samsung’s marketing approach: technology as an everyday companion, accessible and versatile.
+
+Apple’s marketing rely heavily on emotional branding. There advertisements often show familys connecting, students creating, or professionals acheiving success. The message is subtle but powerful: owning Apple products makes life smoother, more creative, and more meaningful. This emotional appeal is reinforced in the store, where the environment feels calm and aspirational.
+
+Samsungs marketing, on the other hand, emphasizes practicality and variety. Their campaigns highlight how devices integrate into daily life—phones that connect to smart fridges, tablets that help with work, and TVs that transform living rooms. The flagship store mirrors this approach by offering demonstrations and workshops that show technology in action. The message is clear: Samsung wants to prove that its products are useful in every corner of life.
+
+Yet both approaches fice challenges. Apple’s iStore sometimes feels intimidating. The polished environment can make customers hesitant to ask questions, and the high prices reinforce the sense of exclusivity. Moreover, Apple’s constant cycle of new product releases encourages frequent upgrades, raising concerns about sustainability and electronic waste. Critics argue that this “upgrade culture” pressures consumers to replace devices unnecessarily.
+
+Samsung’s flagship store faces a different set of issues. Its size and variety can be overwhelming. With so many zones and activities, visitors may become distracted from the core products. Some people come for the workshops or café without engaging deeply with the devices. Additionally, Samsung’s flagship concept has struggled with consistency; while London’s store thrives, similar spaces in other cities have closed when sales slowed.
+
+Apple’s iStore attracts tourists from around the world. Many visitors come not only to shop but to experience the brand’s prestige. The store becomes a destination, a place to take photos and feel part of the Apple community. Samsung’s flagship store, in contrast, appeals more to locals who want to explore technology in a hands-on way. It is less about prestige and more about participation.
+
+The differences can be summarized as tone. Apple’s markting is like a whisper—calm, elegant, persuasive. Samsung’s marketing is like a shout—energetic, colorful, and full of action. Apple makes customers feel like they are joining an exclusive club. Samsung makes them feel like they are joining a community experiment. Both companies design their stores as more than retail spaces. Apple calls its stores “town squares,” places where people can gather, learn, and connect. Samsung calls its flagship store an “experience hub,” where technology feels alive and interactive. These metaphors reveal their philosophies: Apple focuses on identity and belonging, while Samsung focuses on engagement and exploration.
+
+The practical issues remain importants. Apple’s upgrade culture raises questions about environmental responsibility. Samsung’s flagship model raises questions about sustainability of the concept itself. Yet both continue to innovate in how they present technology to the public.
+
+Ultimitely, Apple wins in loyalty. Customers often line up overnight for new iPhones, driven by emotional connection to the brand. Samsung wins in engagement. Visitors spend hours exploring, experimenting, and learning, even if they don’t make a purchase.
+
+The story of Apple and Samsung in London is not about which company is better. It is about how two companies tell very different stories through their stores, and how those stories shape the way people experience technology. Apple’s iStore represents polished exclusivity and emotional branding. Samsung’s flagship store represents interactive accessibility and practical demonstrations. Together, they show two visions of the future: one sleek and aspirational, the other playful and inclusive.
+`,
+    mistakes: [
+      "Apples","are","are","wite","eligance","presision","tecnology",
+      "familys","acheiving","rely","There","flogship","Samsungs",
+      "fice","markting","importants","Ultimitely"
+    ]
+  },
+  {
+    title: "Robots & Society",
+    text: `
+Robots are becoming increesingly common in modern life, transforming everything from how we build cars to how we take care of older people. In many factories, robots weld, paint, and assemble machines faster and with fewer mistakes than humans. This is because robots do not get tired, bored, or distracted by there phones. Some companies even brag that there robotic lines can run all night without stopping, which saves money and boosts productivity. Hospital surgeons use tiny robotic arms that can operate on patients more precisly than a normal hand could ever manage. These medical robots reduce shaking, allow tiny incisions, and speed up recovery, though they cost an enormus amount of money. In Japan, some eldery care homes are experementing with social robots that remind patients to take there medications or simply offer conversation, even if the robot’s jokes are not very funny.
+
+Yet as robots become more capable, society faces new dilemmas. If a robot can do a job faster and cheaper, what happens to the human who once earned a living doing that job? Some experts warn that entire carrer fields might dissapear over the next decade, not because humans are lazy, but because machines are becoming too efficient. Others argue that new oportunities will rise, such as programing, maintaining, and supervising automated systems. A young student today might not dream of being a factory worker, but instead a robotics technitian or data analyst. Still, for people who are unable or unwilling to retrain, the transition could be harsh and unfair.
+
+Another challenge is trust. When we allow robots to make decisions that affect human safety, mistakes can become catastrophic. Self-driving cars have already been involved in several accidents, raising difficult questions about responsability. Should the blame fall on the robot, the programer who coded the algorithm, or the company that sold the product? Legal experts cannot agree, and lawmakers around the world are scrambling to write new rules. Even military robots, including drones and autonomous weapons, spark debates about morality. If a robot fires a missile at the wrong target, who carries the guilt?
+
+Robots also change how people interact with each other. Some teachers worry that children may become too attached to friendly robots and avoid real friendships. Others think robots could help lonely students practice social skills without fear of judgement. In workplaces, robotic automation can reduce teamwork, because machines usually do not chat, argue, or brainstorm. Psychologists warn that if we rely too heavily on automated companions, we might lose certain emotional muscles, the same way astronauts lose physical muscle in space without exercise.
+
+Despite these concerns, society continues to embrase robotic technology because of its obvious benifits. Robots can explore places too danerous for humans, such as underwater wrecks, active volcanoes, or distant planets. On Mars, rovers like Curiosity and Perseverance crawl across dusty plains, drilling holes and taking pictures for scientists on Earth. In agriculture, robots can identify weeds and spray only tiny amounts of chemicals instead of soaking entire fields. This precise farming can reduce pollution and increase harvests, which is important as the world population grows. Even in grocery stores, robotic scanners patrol isles to check for empty shelves or spilled products, freeing up workers for more creative tasks.
+
+However, the more robots we build, the more we must consider ethics. Should robots look like humans, or would that be creepy? Should they speak politely, or simply beep? Should they show fake emotions to make us comfortable, and if so, is that manipulative? Some parents already use robot tutors to help with homework. The tutors speak slowly, never get impatient, and can repeat instructions forever. But teachers wonder if this will change how children view authority or learning. One researcher joked that “students may soon prefer robots, because robots never sigh.”
+
+Economically, the impact could be enormous. Companies that adopt automation quickly might dominate markets, while slower businesses might collapse. Governments may need to develop new policies such as universal basic income, job retraining, or robot taxes to deal with unemployment. Some economists think robots will create more wealth than ever seen before in history, but warn that the wealth might concentrate into the hands of a tiny elite who own the machines. Others are optimistic that new industries will arise, just as airplanes created pilots, airports, and air-traffic controllers.
+
+Culturally, robots provoke both hope and fear. Movies often portray robots as heroic sidekicks or terrifying overlords. In reality, they are usually neither. Most robots just perform boring tasks like sorting packages or welding pipes. But the stories we tell shape our expectations. Some teenagers dream of building robotic helpers, while others worry about a future where machines are smarter than people. Scientists debate whether true artificial intelligence—an AI that can imagine, dream, and feel—will ever exist. If it does, philosophers warn that we must decide what rights such beings should have.
+
+In the end, robots are not magical nor malevolent; they are tools shaped by human choices. As robots become smarter, more adaptible, and more present in our daily routines, the question is not “Will robots change society?” but rather “How will we choose to shape that change?” Whether robots become partners, servants, or competitors depends on the decisions we make today. The real challenge is to ensure that the future remains human, even in a world filled with machines.
+`,
+    mistakes: [
+      "increesingly","there","there","precisly","enormus","eldery",
+      "experementing","carrer","dissapear","oportunites","oportunities",
+      "programing","technitian","responsability","judgement","embrase",
+      "benifits","danerous","isles","adaptible"
+    ]
+  },
+  {
+    title: "Life of a Hobbit",
+    text: `
+Hobbits are a small, cheerful race who live quietly in the rolling hills of the Shire, a peaceful land filled with orchards, gardens, and gental streams. They enjoy simple plesures, such as gardening, eating, and throwing elaborate birthday partys that can sometimes lasted several days. Most hobbits avoid adventure at all costs, believing the outside world to be far too dangerus, unpredictable, and drafty. They prefer warm fireplaces, polished teapots, and cozy slippers instead of dragons, caves, and mysterious wizardes. To outsiders, hobbits may seem dull or uncurious, but hobbits consider themselves sensable, practical, and perfectly content with there lot in life.
+
+Hobbit-holes, their peculiar homes, are carved into hillbanks and decorated with comfy furnature, round windows, and pantrys stuffed with biscuits and seedcakes. Meals are extremly important to hobbits. Not only do they eat breakfast, but also second breakfast, elevenses, lunch, afternoon tea, dinner, and supper. With so many meals in one day, it is little wonder that hobbits tend to be rather plump, although they politely insist they are merely “stout.” Food is not just fuel for hobbits; it is a reason to celibrate, relax, gossip, and occasionally argue over the proper way to roast mushrooms, which is a controversy that has divided entire familys for years.
+
+Life in the Shire follows a slow and predictable rhythm. Farmers tend there barley and pipe-weed fields, while town mayors sign documents and pretend to be very important. Children chase one another through meadows, laughing and occasionally complaining about the weather, which older hobbits claim used to be much better in there youth. Markets are filled with lively chatter, and holidays revolve around food, fireworks, and music that can be heard echoing across the hills. Outsiders rarely visit the Shire, and hobbits rarely leave it. Many hobbits belive, somewhat stubbornly, that there homeland is the safest and finest place in the world, and that nothing beyond its borders could possibly be worth seeing, except perhaps more seedcakes.
+
+Yet every now and again, a hobbit is born who feels a peculiar tug toward adventure. Long ago, one such hobbit named Bilbo Baggins reluctantly traveled with a company of dwarfs to reclaim there stolen treasure from a fearsome dragon. Bilbo began his journey terrified and certain he would die before elevenses, but along the way he discovered courage, cleverness, and a taste for excitement that he never imagined. Years later, Frodo Baggins carried a magical ring on a perilious quest to save Middle-earth from darkness. Frodo did not seek fame, wealth, or songs written in his honor. He fought simply because someone must, making his bravery even more intresting to scholars who still debate whether hobbits are secretly the bravest folk alive.
+
+Hobbits value family, friendship, and modesty. They dislike boasting, bragging, and unnessesary fuss of any sort. If a hobbit accomplishes something extraordinary, they will often downplay it, saying it was “just a bit of good luck” or “nothing really worth mentioning.” This humility makes them rather likable to traveling folk, though some merchants complain hobbits are dreadful hagglers and will argue for half an hour over the price of one tomato. They are particularly fond of riddles, jokes, and pranks. A clever hobbit can settle a dispute not with swords or shouting but with a well-told story that leaves both sides laughing and somewhat confused.
+
+Still, hobbits are not without flaws. They can be suspicious of strangers, especially tall ones, and they can be nosy, peeking over fences or through windows to observe there neighbors’ odd habits. They also fear change, worrying endlessly about anything that might disrupt the peace and quiet of daily life. When Frodo announced he intended to move away, many hobbits declared it the most shocking news since Bilbo’s dissapearance decades earlier. A few muttered that adventurers were always peculiar and that nothing good ever came from befriending wizards, though plenty of hobbits secretly hoped to catch a glimpse of one anyway.
+
+Despite there anxieties, hobbits possess a quiet resilience that outsiders often overlook. Though they are small, they can walk long distances without excessive complaining. Though they dislike danger, they can face it with surprising determination when there friends or homeland are threatened. Some historians argue hobbits developed this toughness through sturdy meals and constant gardening, which builds muscles in the legs and patience in the heart. Others theorize hobbits train their courage in tiny ways, such as climbing trees, exploring basements filled with spiders, or sampling untested pastries baked by eccentric aunts.
+
+In the end, hobbits show that true bravery is not the absense of fear but the willingness to act despite it. They prove that even the smallest person can change the course of history, provided they have loyalty, friendship, and a pinch of stubborness to guide them. And while the world beyond the Shire remains full of peril, dragons, and gloomy forests, hobbits remind everyone that comfort, kindness, and a well-timed meal are just as essential to victory as swords, spells, and heroic speeches.
+`,
+    mistakes: [
+      "gental","plesures","partys","dangerus","wizardes","sensable",
+      "there","furnature","pantrys","extremly","celibrate","familys",
+      "there","belive","hillbanks","perilious","intresting","unnessesary",
+      "hagglers","there","dissapearance","absense","stubborness"
+    ]
+  },
+  {
+    title: "Big Bang & the Cosmos",
+    text: `
+Scientists belive the universe began more than 13 billion years ago with an event called the Big Bang. Before this event, there was no space, no time, and no matter—only a single point of unimaginable density and heat. Then, in a fraction of a second, the cosmos expanded faster then light, stretching like an inflating balloon. As it cooled, tiny particles formed atoms, which eventually joined into gas clouds. Gravity then pulled these clouds together, forming the earliest stars and galaxys. Without this early cosmic collapse, our universe would still be an empty, silent expanse.
+
+For many decades, the Big Bang was only a theory, and plenty of scientists doubted it. Some belived the universe had always existed and would continue forever without begining or end. But in the 1920s, astronomer Edwin Hubble observed that far-off galaxys were moving away from each other, suggesting that space itself was expanding. Later, researchers detected faint microwaves called cosmic background radition, the leftover “heat afterglow” of the Big Bang. This evidence convinced most astronomers that the Big Bang model was not just clever speculation, but the best explanation we currently have.
+
+The cosmos did not stay simple for long. Inside the first stars, nuclear fusion forged heavier elements such as carbon, oxygen, and iron. When the biggest stars collapsed and exploded in supernovas, they scattered these elements across space. Without such violent explosions, planets like Earth could never have formed. Billions of years later, swirling clouds of dust and rock collided to build worlds, moons, and asteroids. Even today, scientists argue over how many planets might exist in our galaxy alone—some suspect hundreds of billions, while others claim there could be far more if we count dwarf-planets, mega-moons, and other odd bodys that defy simple labels.
+
+As astronomers studied the universe more closely, they discovered mysterious substances that do not behave like ordinary matter. One example is dark matter, which does not glow, reflect, or absorb light, making it invisible to telescopes. Yet its gravity effects the motion of stars and galaxys. Without dark matter, galaxys would fly apart like sparks from a campfire. Stranger still is dark energy, a force that seems to push the universe apart at accelerating speed. No one knows exactly what dark energy is, but it currently makes up most of the cosmos, which is rather embarrassing considering humans have almost no idea how it works.
+
+Black holes are another puzzling phenomenon. They are formed when massive stars collapse under their own gravity, creating regions so dense that not even light can escape. Some black holes are tiny, only a few miles across, while others are supermassive, sitting in the centers of galaxys and weighing millions of times more than the Sun. Despite their terrifying reputation, black holes do not “suck” everything nearby like vacuums; objects must cross a boundary called the event horizon to be trapped. Astronomers used to think black holes were perfectly silent, but recent research suggests they may leak radiation or slowly evaporate, which raises more questions than answers.
+
+The Big Bang theory also suggests the universe is still evolving. Stars are born, shine for billions of years, and then die in predictable ways. Small stars fade quietly into white dwarfes, while huge stars explode violently. Planets migrate, moons are captured, comets collide, and galaxys crash together in cosmic slow-motion. When our Milky Way eventually merges with the Andromeda Galaxy, the night sky will look dramatically different, although no one alive today will see it—unless medical science improves much faster than expected.
+
+Yet for all our knowledge, the universe remains full of unknowns. Scientists argue about whether space is finite or infinite, and whether it is curved, flat, or something far stranger. Some physicists propose the existence of multiverses, vast collections of universes that each follow there own rules of physics. If such realms exist, then our universe may be just one tiny bubble in an impossibly larger sea. Others caution that these ideas, while exciting, are difficult to test and might remain in the category of speculative dreaming for centuries.
+
+Earth occupies a humble place in this vast cosmos. Our planet circles a fairly ordinary star, located in a typical spiral galaxy, in no particularly special region of space. It took billions of years of cooling, chemistry, and geological chaos before life emerged in Earth’s oceans. From simple cells to complex creatures, evolution shaped life until eventually one species—humans—developed curiosity powerful enough to ask where the universe came from. The fact that tiny creatures living on a small blue world can study the cosmos at all is, as some researchers put it, “an extremly peculiar triumph.”
+
+Even with powerful telescopes and space probes, our understanding remains unfinished. Scientists still debate why the Big Bang happend, what triggered it, and what existed—if anything—before. They wonder how long the universe will continue expanding, and whether it will freeze, collapse, or transform into something we cannot yet imagine. The Big Bang may have been the begining of the cosmos, but it is not the end of the story. As technology improves and theories evolve, the universe continues to reveal new mysteries, inviting more questions than answers.
+`,
+    mistakes: [
+      "belive","then","galaxys","belived","begining","radition","bodys",
+      "effects","dwarfes","there","extremly","happend","begining"
+    ]
+  }
 ];
 
-/* Starting position (but set properly AFTER Start is pressed) */
-let position = 0;
-
-let lastTime = performance.now();
-let pixelsPerSecond = 12.5;
-let targetSpeed = 12.5;
-
+// =============================
+// STATE
+// =============================
+let chosenIndex = null;
+let chosen = null;
+let clickedCorrect = 0;
+let clickedIncorrect = 0;
 let exerciseStarted = false;
 let ended = false;
+let position = 0;
+let speed = 12.5;
 
-/* Prepare clickable spans */
-textContainer.querySelectorAll("p").forEach(p => {
-  p.innerHTML = p.innerText
-    .split(" ")
+const wrapper = document.getElementById("scroll-wrapper");
+const textBox = document.getElementById("scroll-text");
+
+// =============================
+// UTILS
+// =============================
+function wrapWords(text) {
+  return text
+    .trim()
+    .split(/\s+/)
     .map(w => `<span class="word">${w}</span>`)
     .join(" ");
-});
+}
 
-/* Word clicking */
-document.querySelectorAll(".word").forEach(span => {
-  span.addEventListener("click", () => {
-    if (!exerciseStarted || ended) return;
-    if (mistakes.includes(span.innerText)) {
-      if (!span.classList.contains("correct")) {
-        span.classList.add("correct");
-        targetSpeed += 6;
+function chooseRandomPassage() {
+  chosenIndex = Math.floor(Math.random() * passages.length);
+  chosen = passages[chosenIndex];
+}
+
+function attachClickHandlers() {
+  document.querySelectorAll(".word").forEach(w => {
+    w.classList.remove("correct","incorrect");
+    w.onclick = () => {
+      if (!exerciseStarted || ended) return;
+      const raw = w.innerText.replace(/[^\w]/g, "");
+      if (chosen.mistakes.includes(raw)) {
+        if (!w.classList.contains("correct")) {
+          w.classList.add("correct");
+          clickedCorrect++;
+          // speed up on correct
+          speed += 1.5;
+        }
+      } else {
+        if (!w.classList.contains("incorrect")) {
+          w.classList.add("incorrect");
+          clickedIncorrect++;
+        }
       }
-    } else {
-      span.classList.add("incorrect");
-    }
+    };
   });
-});
+}
 
-/* Start button */
-document.getElementById("start-btn").addEventListener("click", () => {
-  exerciseStarted = true;
+function loadPassage() {
+  const paragraphs = chosen.text.trim().split(/\n\s*\n/);
+  textBox.innerHTML = paragraphs.map(p => `<p>${wrapWords(p)}</p>`).join("");
 
+  clickedCorrect = 0;
+  clickedIncorrect = 0;
+  ended = false;
+  exerciseStarted = false;
+  speed = 12.5;
+  attachClickHandlers();
+}
+
+// =============================
+// START BUTTON
+// =============================
+document.getElementById("start-btn").onclick = () => {
   document.getElementById("launch-overlay").style.display = "none";
-  scrollWrapper.style.display = "block";
+  wrapper.style.display = "block";
 
-  /* NOW the wrapper has a real height → safe to set starting pos */
+  // now wrapper has a height – set starting position to bottom third, then start
   requestAnimationFrame(() => {
-    position = scrollWrapper.clientHeight * 0.5;  // HALF WAY UP
-    textContainer.style.top = position + "px";
+    position = wrapper.clientHeight * (2/3);
+    textBox.style.top = position + "px";
+    exerciseStarted = true;
   });
-});
+};
 
-/* End continue */
-document.getElementById("continue-btn").addEventListener("click", () => {
-  window.location.href = "https://apfthomas-cpu.github.io/cranium_gymnasium_multiple_choice/";
-});
-
-/* Main scroll loop */
-function scrollText(t) {
-  const delta = (t - lastTime) / 1000;
-  lastTime = t;
+// =============================
+// SCROLL LOOP
+// =============================
+let last = performance.now();
+function scrollLoop(t) {
+  const dt = (t - last) / 1000;
+  last = t;
 
   if (exerciseStarted && !ended) {
-    pixelsPerSecond += (targetSpeed - pixelsPerSecond) * 0.04;
-    position -= pixelsPerSecond * delta;
-    textContainer.style.top = position + "px";
+    position -= speed * dt;
+    textBox.style.top = position + "px";
+    if (position + textBox.offsetHeight <= 0) {
+      endGame();
+    }
   }
-
-  requestAnimationFrame(scrollText);
+  requestAnimationFrame(scrollLoop);
 }
-requestAnimationFrame(scrollText);
+requestAnimationFrame(scrollLoop);
 
-/* End detection */
-function checkEnd() {
-  if (!exerciseStarted || ended) {
-    requestAnimationFrame(checkEnd);
-    return;
+// =============================
+// END + RESULTS
+// =============================
+function endGame() {
+  ended = true;
+  wrapper.style.display = "none";
+
+  const total = chosen.mistakes.length;
+  const accuracy = Math.round((clickedCorrect / total) * 100);
+
+  const best = localStorage.getItem("bestScore");
+  if (!best || accuracy > best) {
+    localStorage.setItem("bestScore", accuracy);
   }
 
-  const textHeight = textContainer.offsetHeight;
-  if (position + textHeight <= 0) {
-    ended = true;
-    document.getElementById("end-overlay").style.display = "flex";
-    return;
-  }
+  document.getElementById("correct-line").innerText =
+    `Correct: ${clickedCorrect} / ${total}`;
+  document.getElementById("incorrect-line").innerText =
+    `Incorrect clicks: ${clickedIncorrect}`;
+  document.getElementById("accuracy-line").innerText =
+    `Accuracy: ${isNaN(accuracy) ? 0 : accuracy}%`;
+  document.getElementById("best-line").innerText =
+    `Best score: ${localStorage.getItem("bestScore") || 0}%`;
 
-  requestAnimationFrame(checkEnd);
+  document.getElementById("end-overlay").style.display = "flex";
 }
-requestAnimationFrame(checkEnd);
+
+// =============================
+// RETRY + NEW TEXT
+// =============================
+document.getElementById("retry-btn").onclick = () => {
+  document.getElementById("end-overlay").style.display = "none";
+  wrapper.style.display = "block";
+  loadPassage();
+
+  requestAnimationFrame(() => {
+    position = wrapper.clientHeight * (2/3);
+    textBox.style.top = position + "px";
+    exerciseStarted = true;
+  });
+};
+
+document.getElementById("new-btn").onclick = () => {
+  document.getElementById("end-overlay").style.display = "none";
+  chooseRandomPassage();
+  wrapper.style.display = "block";
+  loadPassage();
+
+  requestAnimationFrame(() => {
+    position = wrapper.clientHeight * (2/3);
+    textBox.style.top = position + "px";
+    exerciseStarted = true;
+  });
+};
+
+// =============================
+// INITIALISE
+// =============================
+chooseRandomPassage();
+loadPassage();
 </script>
 
 </body>
 </html>
-
